@@ -1,0 +1,7 @@
+
+rm thunderFolderIndexer.out.txt thunderFolderIndexer.err.txt 
+nohup ./thunderFolderIndexer_sh > thunderFolderIndexer.out.txt 2> thunderFolderIndexer.err.txt
+
+rm thunderFolderUsageScanner.out.txt thunderFolderUsageScanner.err.txt
+nohup ./thunderFolderUsageScanner_sh > thunderFolderUsageScanner.out.txt 2> thunderFolderUsageScanner.err.txt
+ 

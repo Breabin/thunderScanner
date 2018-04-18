@@ -1,0 +1,89 @@
+#!/bin/ksh
+#set -x
+# Author Alexandru Prodan
+
+
+folderSizeToIngnore=-1
+folderSizeToGetDU=100000
+folderNameToIgnore=
+folderListToIgnore=
+
+indexesFolder=./indexes
+indexFileNamePrefix=depth
+indexFileNameSufix=index
+
+outputFolder=./out
+outputFile=${outputFolder}/problematic.folders.txt 
+
+mkdir -p $outputFolder
+date > $outputFile 
+
+for i in `seq -f "%02g" -s" " 11 -1 1`; do
+ curentIndexFile=${indexesFolder}/${indexFileNamePrefix}_${i}.${indexFileNameSufix} 
+ folderListToIgnore=`echo $folderListToIgnore $folderListToIgnoreNextDepth $folderNameToIgnore| xargs -n1 | sort -u`
+ folderListToIgnoreNextDepth=""
+ for folderToIgnoreThisDepth in `echo $folderListToIgnore` ; do 
+   parentToIgnoreNextDepth=$(dirname "$folderToIgnoreThisDepth")
+   folderListToIgnoreNextDepth=`echo $folderListToIgnoreNextDepth $parentToIgnoreNextDepth| xargs -n1 | sort -u` 
+ done
+ 
+ echo "LEVEL $i"
+ echo folderListToIgnore=$folderListToIgnore
+ echo folderListToIgnoreNextDepth=$folderListToIgnoreNextDepth
+  
+ 
+ if [[ ! -f ${curentIndexFile} ]]; then
+    continue 
+ fi 
+ printf "${curentIndexFile}\n" >>$outputFile 
+
+ for folder in `cat ${curentIndexFile}|sort|uniq`; do
+   if [[ ! -d $folder  ]] ; then
+     continue
+   fi
+   
+   folderSize=`ls -ld "$folder"| awk '{print $5}'`
+   folderDate=`ls -ld --full-time "$folder"| awk '{print $6}'`
+   if [[ $folderSize -lt $folderSizeToIngnore ]]; then
+      continue
+   fi
+   if [[ "${folder#*${folderNameToIgnore}}" != "$folder" ]] ; then 
+      continue
+   fi
+   
+   for patternToIgnore in `echo ${folderListToIgnore}` ; do
+    if [[ "${folder#*${patternToIgnore}}" != "$folder" ]] ; then 	
+      echo "patternToIgnore=$patternToIgnore folder=$folder"	
+      break
+    fi
+   done
+   
+   if [[ "${folder#*${patternToIgnore}}" != "$folder" ]] ; then 	  
+      continue
+   fi
+   
+   outputString="$folder"
+   outputString="${outputString}|$folderDate"
+   outputString="${outputString}|$folderSize"
+   
+   if [[ $folderSize -lt ${folderSizeToGetDU} ]] ; then
+     echo "du $folder" 
+     folderDiskUsage=`du -h $folder| tail -1 |awk '{print $1}'`      
+     folderFilesCount=`ls $folder| wc -l` 
+     outputString="${outputString}|$folderDiskUsage"
+     outputString="${outputString}|$folderFilesCount"
+   else     
+     parentDir=$(dirname "$folder")
+     if [[ "xxx${parentDir}" != 'xxx.' &&  "xxx${parentDir}" != "xxx/opt/data/storage01"  ]] ; then
+      folderListToIgnoreNextDepth=`echo $folderListToIgnoreNextDepth ${parentDir}|xargs -n1 | sort -u` 	  
+	  echo "will skip in next level ${parentDir} because folderSize=$folderSize folder=$folder"
+	  echo folderListToIgnoreNextDepth=$folderListToIgnoreNextDepth
+	  echo 
+     fi     
+   fi
+   printf  "${outputString} \n" >> $outputFile 
+   outputString=""    
+ done 
+done
+
+

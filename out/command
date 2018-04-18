@@ -1,0 +1,31 @@
+cat problematic.folders.txt | sort | uniq > problematic.folders_sorted.txt
+mv problematic.folders_sorted.txt problematic.folders.txt
+
+cat problematic.folders.txt | grep -P "[0-9]{1,9}[G,T]{1}"  | awk -F'=' '{print $2}'| sort >big_folders.csv
+
+
+
+cat problematic.folders.txt | grep -P "[0-9]{1,9}[G]{1}"                 | sort > folders.over_1Gb.csv
+cat problematic.folders.txt | grep -P "[1-9][0-9]{2,9}[G]{1}"            | sort > folders.over_100Gb.csv
+cat problematic.folders.txt | grep -P "[0-9]{1,9}[T]{1}"                 | sort > folders.over_1Tb.csv 
+cat problematic.folders.txt | grep -P "[5-9][0-9]{2,20}[M]{1}"           | sort > folders.over_500Mb.csv
+cat problematic.folders.txt | grep -P "\|[0-9]{6,25}"                    | sort > folders_with_many_files.csv
+cat problematic.folders.txt | grep -P "\|[0-9]{6,25}" | grep -v "|2018-" | sort > old_folders_with_many_files.csv
+cat folders.over_1Gb.csv | grep 2014- >  1Gb_2014.csv
+cat folders.over_1Gb.csv | grep 2015- >  1Gb_2015.csv
+cat folders.over_1Gb.csv | grep 2016- >  1Gb_2016.csv
+cat folders.over_1Gb.csv | grep 2017- >  1Gb_2017.csv
+cat folders.over_1Gb.csv | grep 2018- >  1Gb_2018.csv
+
+cat folders.over_500Mb.csv | grep 2014- >  500Mb_2014.csv
+cat folders.over_500Mb.csv | grep 2015- >  500Mb_2015.csv
+cat folders.over_500Mb.csv | grep 2016- >  500Mb_2016.csv
+cat folders.over_500Mb.csv | grep 2017- >  500Mb_2017.csv
+cat folders.over_500Mb.csv | grep 2018- >  500Mb_2018.csv
+
+cat folders_with_many_files.csv | grep 2014- >  TMF_2014.csv
+cat folders_with_many_files.csv | grep 2015- >  TMF_2015.csv
+cat folders_with_many_files.csv | grep 2016- >  TMF_2016.csv
+cat folders_with_many_files.csv | grep 2017- >  TMF_2017.csv
+cat folders_with_many_files.csv | grep 2018- >  TMF_2018.csv
+

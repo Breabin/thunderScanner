@@ -1,0 +1,66 @@
+#!/bin/ksh
+
+# Author Alexandru Prodan
+#set -x
+
+rootFolder=/opt/data/stage01
+indexesFolder=./indexes
+indexFileNamePrefix=depth
+indexFileNameSufix=index
+folderSizeToGetDU=100000
+
+if [[ -f getAllFolders.c ]]; then
+ gcc -o getAllFolders getAllFolders.c
+fi
+
+if [[ -f getAllfiles.c ]]; then
+ gcc -o getAllfiles getAllfiles.c
+fi
+
+mkdir -p ${indexesFolder}
+rm -rf ${indexesFolder}/${indexFileNamePrefix}_*.${indexFileNameSufix}
+
+for i in `seq -f "%02g" 1 11`; do
+  previousIndexFile=${indexesFolder}/${indexFileNamePrefix}_${previousIndex}.${indexFileNameSufix}
+  curentIndexFile=${indexesFolder}/${indexFileNamePrefix}_${i}.${indexFileNameSufix} 
+  echo>${curentIndexFile}
+  
+ if [[ $i -eq "01" ]]; then
+  ./getAllFolders $rootFolder | grep -v \\.$ | grep -v "//" > ${curentIndexFile}
+  cat ${curentIndexFile}|sort -u > ${curentIndexFile}_tmp
+  mv ${curentIndexFile}_tmp ${curentIndexFile}
+  #echo $rootFolder/ecdw_mediation>> ${curentIndexFile}
+ else  
+  if [[ -s ${previousIndexFile} ]] ; then
+     for folder in `cat ${previousIndexFile}` ; do
+        if [[ ! -d $folder ]] ; then
+          echo "skip $folder" 
+          continue
+        fi
+
+        folderSize=`ls -ld $folder| awk '{print $5}'` 2>/dev/null
+	if [[ $folderSize -lt ${folderSizeToGetDU} ]] ; then
+	   ./getAllFolders $folder | grep -v \\.$ | grep -v "//" >> ${curentIndexFile} 2>/dev/null
+           retResSts=$?
+           if [ "xxx$retResSts" -ne "xxx0" ]; then
+              echo FAIL $folder $retResSts 
+           fi
+	fi       
+     done     
+  else 
+     if [[ -f ${previousIndexFile} ]]; then
+       rm -rf ${previousIndexFile}
+     fi
+     break  
+  fi   
+  sleep 1
+ fi
+ previousIndex=$i
+ echo $previousIndex=$i
+done
+
+echo "======== Folders structure Scan End ========"
+
+
+
+
