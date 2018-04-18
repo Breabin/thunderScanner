@@ -1,9 +1,11 @@
 /*
  * List directories using getdents() because ls, find and Python libraries
  * use readdir() which is slower (but uses getdents() underneath.
+ * 
+ * author Alexandru Prodan alexandruprodan@gmail.com 
  *
  * Compile with 
- * ]$ gcc  getFINfiles.c -o getFINfiles 
+ * ]$ gcc  getAllfiles.c -o getAllfiles 
  */
 #define _GNU_SOURCE
 #include <dirent.h>     /* Defines DT_* constants */

@@ -2,10 +2,10 @@
  * List directories using getdents() because ls, find and Python libraries
  * use readdir() which is slower (but uses getdents() underneath.
  *  
- *  Author: Alexandru Prodan ap8774@att.com
+ *  Author: Alexandru Prodan alexandruprodan@gmail.com 
  *
  * Compile with 
- * ]$ gcc  getFINfiles.c -o getFINfiles 
+ * ]$ gcc  getAllFolders.c -o getAllFolders
  */
 
 #define _GNU_SOURCE
